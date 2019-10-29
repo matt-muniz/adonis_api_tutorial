@@ -107,26 +107,17 @@ class CustomerController {
    * @param {Response} ctx.response
    */
   async update({ params: { id }, request, response }) {
-    const customer = await Customer.find(id);
+    const { name, description, customer } = request.post();
 
-    if (customer) {
-      const { name, description } = request.post();
+    customer.name = name;
+    customer.description = description;
 
-      customer.name = name;
-      customer.description = description;
+    await customer.save();
 
-      await customer.save();
-
-      response.status(200).json({
-        message: "Successfully updated this customer",
-        data: customer
-      });
-    } else {
-      response.status(404).json({
-        message: "Customer not found",
-        id
-      });
-    }
+    response.status(200).json({
+      message: "Successfully updated this customer",
+      data: customer
+    });
   }
 
   /**
@@ -138,21 +129,13 @@ class CustomerController {
    * @param {Response} ctx.response
    */
   async destroy({ params: { id }, request, response }) {
-    const customer = await Customer.find(id);
+    const customer = request.post().customer;
+    await customer.delete();
 
-    if (customer) {
-      await customer.delete();
-
-      response.status(200).json({
-        message: "Successfully deleted this customer",
-        id
-      });
-    } else {
-      response.status(404).json({
-        message: "Customer not found",
-        id
-      });
-    }
+    response.status(200).json({
+      message: "Successfully deleted this customer",
+      id
+    });
   }
 }
 
