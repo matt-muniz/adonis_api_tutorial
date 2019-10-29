@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +14,16 @@
 */
 
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
-const Route = use('Route')
+const Route = use("Route");
 
-Route.on('/').render('welcome')
+Route.get("/", "CustomerController.index");
+Route.get("/customer/:id", "CustomerController.show").middleware([
+  "findCustomer"
+]);
+Route.post("/customer", "CustomerController.store");
+Route.patch("customer/:id", "CustomerController.update").middleware([
+  "findCustomer"
+]);
+Route.delete("customer/:id", "CustomerController.destroy").middleware([
+  "findCustomer"
+]);

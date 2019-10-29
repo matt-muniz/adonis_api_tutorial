@@ -1,5 +1,5 @@
-'use strict'
-
+"use strict";
+const Customer = use("App/Models/Customer");
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
@@ -17,7 +17,13 @@ class CustomerController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
+  async index({ request, response, view }) {
+    const customers = await Customer.all();
+
+    response.status(200).json({
+      message: "Here are your customers",
+      data: customers
+    });
   }
 
   /**
@@ -29,8 +35,7 @@ class CustomerController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async create ({ request, response, view }) {
-  }
+  // async create({ request, response, view }) {}
 
   /**
    * Create/save a new customer.
@@ -40,7 +45,29 @@ class CustomerController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store({ request, response }) {
+    const { name, description } = request.post();
+
+    // SAVE vs CREATE
+
+    // const customer = new Customer();
+    // customer.name = name;
+    // customer.description = description;
+
+    // await customer.save();
+
+    const data = {
+      name,
+      description
+    };
+
+    // save and get instance back
+    const customer = await Customer.create(data);
+
+    response.status(201).json({
+      message: "Successfully created a new customer",
+      data: customer
+    });
   }
 
   /**
@@ -52,7 +79,12 @@ class CustomerController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
+  async show({ params: { id }, request, response }) {
+    const customer = request.post().customer;
+    response.status(200).json({
+      message: "Here is your customer",
+      data: customer
+    });
   }
 
   /**
@@ -64,8 +96,7 @@ class CustomerController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async edit ({ params, request, response, view }) {
-  }
+  async edit({ params, request, response, view }) {}
 
   /**
    * Update customer details.
@@ -75,7 +106,27 @@ class CustomerController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update({ params: { id }, request, response }) {
+    const customer = await Customer.find(id);
+
+    if (customer) {
+      const { name, description } = request.post();
+
+      customer.name = name;
+      customer.description = description;
+
+      await customer.save();
+
+      response.status(200).json({
+        message: "Successfully updated this customer",
+        data: customer
+      });
+    } else {
+      response.status(404).json({
+        message: "Customer not found",
+        id
+      });
+    }
   }
 
   /**
@@ -86,8 +137,23 @@ class CustomerController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy({ params: { id }, request, response }) {
+    const customer = await Customer.find(id);
+
+    if (customer) {
+      await customer.delete();
+
+      response.status(200).json({
+        message: "Successfully deleted this customer",
+        id
+      });
+    } else {
+      response.status(404).json({
+        message: "Customer not found",
+        id
+      });
+    }
   }
 }
 
-module.exports = CustomerController
+module.exports = CustomerController;
